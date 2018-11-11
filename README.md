@@ -37,4 +37,4 @@ The application depends on the following libraries:
 * __Powermock (version 1.7.1):__ Used for unit testing where static methods mocking was needed. This library was used specifically with Mockito.
 * __Logback (version 1.2.3):__ Used for logging. This library is a native SLF4J implementation.
 
-This application was done to be used with __Java 1.8+__
+This application was made to be used with __Java 1.8+__
