@@ -2,50 +2,64 @@ package com.belatrixsf.scraper.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.ResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Configuration of the application
  * @author David Gomez
  */
-public class Config {
+public enum Config {
     
-    /** Class unique instance */
-    private static final Config INSTANCE = new Config();
+    INSTANCE;
     
+    /** Logger */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
+
     /** Properties configuration */
-    private Properties scraperConfig;
+    private static Properties scraperConfig;
+
+    /** Resource Bundle */
+    private static ResourceBundle messages;
 
     /**
-     * Constructor
-     * Initialises the application properties
+     * Initializes the application properties
      */
-    private Config() {
+    static {
         scraperConfig = new Properties();
         InputStream configFile = Config.class.getResourceAsStream("/scraper.properties");
         
         try {
             scraperConfig.load(configFile);
+            messages = ResourceBundle.getBundle("messagesBundle");
         } catch (IOException e) {
-            System.out.println("Error loading the config file: " + e.getMessage());
-		}
+            LOGGER.error("Error loading the scraper config file", e);
+        }
     }
 
     /**
-     * Returns the instance of the configuration
-     * @return instance
-     */
-    public static Config getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Returns a property value if present
+     * Returns a property value if present, otherwise empty
      * @param key key name of the property
      * @return optional object with the property value
      */
-    public Optional<String> getProperty(String key) {
-        return Optional.ofNullable(scraperConfig.getProperty(key));
+    public static Optional<String> getProperty(String key) {
+        String value = System.getProperty(key, scraperConfig.getProperty(key));
+        return Optional.ofNullable(value);
+    }
+
+    /**
+     * Returns a message value if present, otherwise empty
+     * @param key key name of the message
+     * @return the message value or empty if not found
+     */
+    public static String getMessage(String key, Object... args) {
+        String value = MessageFormat.format(messages.getString(key), args);
+        return Optional.of(value).orElse("");
     }
 }

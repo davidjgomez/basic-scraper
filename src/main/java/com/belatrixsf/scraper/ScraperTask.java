@@ -1,5 +1,7 @@
 package com.belatrixsf.scraper;
 
+import static com.belatrixsf.scraper.config.Config.getMessage;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -11,12 +13,17 @@ import com.belatrixsf.scraper.pattern.ScraperPattern;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scraper task to process one specific URL
  * @author David Gomez
  */
 public class ScraperTask implements Runnable {
+
+    /** Logger */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScraperTask.class);
 
     /** Path used to create the output file */
     private String path;
@@ -44,21 +51,19 @@ public class ScraperTask implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Processing " + url + "...");
+            LOGGER.info(getMessage("scraperTask.scrapingFile", url));
 
             Document document = Jsoup.connect(url).get();
             List<String> matches = pattern.match(document);
             new MatchesFileWriter(path, url).write(matches);
-
-            System.out.println("End of process of " + url);
-        } catch (MalformedURLException e) {
-            System.out.println("The URL is malformed or is using an inadequate protocol: " + url);
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            LOGGER.error(getMessage("scraperTask.errorMalformedURL", e));
         } catch (HttpStatusException e) {   
-			System.out.println("Error "+ e.getStatusCode() + " requesting the page: " + e.getMessage());
+			LOGGER.error(getMessage("scraperTask.errorRequestingPage", e.getStatusCode(), e.getMessage()));
         } catch (SocketTimeoutException e) {   
-			System.out.println("Timeout requesting " + url);
+			LOGGER.error(getMessage("scraperTask.errorTimeout", url));
 		} catch (IOException e) {   
-			System.out.println("Cannot process the URL ("+ url + "): " + e.getMessage());
+			LOGGER.error(getMessage("scraperTask.errorProcessingPage", url, e.getMessage()));
 		}
     }
 }

@@ -1,17 +1,25 @@
 package com.belatrixsf.scraper.io;
 
 
+import static com.belatrixsf.scraper.config.Config.getMessage;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * File matches writer
  * @author David Gomez
  */
 public class MatchesFileWriter {
+
+    /** Logger */
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchesFileWriter.class);
 
     /** Path where the output file is created */
     private String path;
@@ -36,7 +44,7 @@ public class MatchesFileWriter {
     private Path getOutputFileName() {
         Path finalPath = Paths.get(path, url.
             substring(0, Math.min(url.length(), 200)).
-            replaceAll("(https?:|www|[/\\.])", "").
+            replaceAll("(https?:|www|[/\\.:])", "").
             concat(".txt"));
 
         return finalPath;
@@ -47,13 +55,14 @@ public class MatchesFileWriter {
      * @param matches matches found
      */
     public void write(List<String> matches) throws IOException {
-        Path filePath = getOutputFileName();
 
         if(!matches.isEmpty()) {
+            Path filePath = getOutputFileName();
             Files.write(filePath, matches);
+            LOGGER.info(getMessage("io.matchesFileWriter.resultFileCreated", url, filePath));
         }
         else {
-            Files.write(filePath, "Matches not found!".getBytes());
+            LOGGER.info(getMessage("io.matchesFileWriter.resultFileNotCreated", url));
         }
     }
 }

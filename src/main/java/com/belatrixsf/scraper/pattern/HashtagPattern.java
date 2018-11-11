@@ -1,5 +1,7 @@
 package com.belatrixsf.scraper.pattern;
 
+import static com.belatrixsf.scraper.config.Config.getMessage;
+
 /**
  * Hashtag pattern
  * @author David Gomez
@@ -12,7 +14,7 @@ public class HashtagPattern extends TextPattern {
      */
     @Override
     public String getName() {
-        return "Hashtag (#) Pattern";
+        return getMessage("pattern.hashtagPattern.name");
     }
 
     /**
@@ -21,6 +23,6 @@ public class HashtagPattern extends TextPattern {
      */
     @Override
     protected String getTextPattern() {
-        return "\\B#\\w*[a-zA-Z]+\\w*";
+        return getMessage("pattern.hashtagPattern.regex");
     }
 }

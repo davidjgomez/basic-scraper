@@ -3,17 +3,19 @@ package com.belatrixsf.scraper.io;
 import static com.belatrixsf.scraper.io.URLFileReader.readURLs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 /**
  * Tests the file reader
@@ -25,12 +27,24 @@ public class URLFileReaderTest {
     private static final String TEST_PATH = "./target";
 
     /**
+     * Tests that the result of reading an malformed path is empty
+     * 
+     * @throws IOException
+     * @throws InvalidPathException
+     */
+    @Test
+    public void mustThrowExceptionInvalidPath() throws IOException {
+        Executable executable = () -> readURLs("#%34535.,::;3535\\][]#$%#$");
+        assertThrows(InvalidPathException.class, executable, "Invalid path!");
+    }
+    
+    /**
      * Tests that the result of reading an unexistent file is empty
      */
     @Test
-    public void mustGetEmptyStream() {
-        Stream<String> urls = readURLs("anUnexistentFile.txt");
-        assertEquals(0, urls.count(), "There must not be possible URLs to read!");
+    public void mustThrowExceptionInvalidFile() {
+        Executable executable = () -> readURLs("anUnexistentFile.txt");
+        assertThrows(IOException.class, executable, "Invalid file!");
     }
 
     /**

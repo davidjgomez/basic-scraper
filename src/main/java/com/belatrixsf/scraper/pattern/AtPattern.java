@@ -1,5 +1,7 @@
 package com.belatrixsf.scraper.pattern;
 
+import static com.belatrixsf.scraper.config.Config.getMessage;
+
 /**
  * At pattern
  * @author David Gomez
@@ -12,7 +14,7 @@ public class AtPattern extends TextPattern {
      */
     @Override
     public String getName() {
-        return "At (@) Pattern";
+        return getMessage("pattern.atPattern.name");
     }
 
     /**
@@ -21,6 +23,6 @@ public class AtPattern extends TextPattern {
      */
     @Override
     protected String getTextPattern() {
-        return "^@[A-Za-z0-9_]{1,15}$";
+        return getMessage("pattern.atPattern.regex");
     }
 }

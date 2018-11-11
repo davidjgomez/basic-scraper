@@ -2,15 +2,19 @@ package com.belatrixsf.scraper.pattern;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
 
 import java.util.Optional;
+
+import com.belatrixsf.scraper.pattern.exception.PatternNotFoundException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -26,7 +30,22 @@ public class ScraperPatternFactoryTest {
      */
     @Before
     public void beforeEach() {
-        PowerMockito.spy(ScraperPatternFactory.class);
+        spy(ScraperPatternFactory.class);
+    }
+
+    /**
+     * Tests that a pattern has not been found
+     * @throws Exception if an error using PowerMockito is found
+     */
+    @Test
+    public void mustNotFindThePattern() throws Exception {
+        doReturn(Optional.of("notExistentPattern"))
+            .when(ScraperPatternFactory.class, "getClassName");
+        
+        assertThrows(PatternNotFoundException.class, ScraperPatternFactory::getPattern, 
+                "Pattern must not be present!");
+
+        verifyPrivate(ScraperPatternFactory.class).invoke("getClassName");
     }
 
     /**
@@ -35,32 +54,15 @@ public class ScraperPatternFactoryTest {
      */
     @Test
     public void mustReturnAnExpectedPattern() throws Exception {
-        PowerMockito.doReturn(Optional.of(AtPattern.class.getCanonicalName()))
+        doReturn(Optional.of(AtPattern.class.getCanonicalName()))
             .when(ScraperPatternFactory.class, "getClassName");
 
-        Optional<ScraperPattern> pattern = ScraperPatternFactory.getPattern();
+        ScraperPattern pattern = 
+            assertDoesNotThrow(ScraperPatternFactory::getPattern, 
+                                "Pattern must be present!");
 
-        assertTrue(pattern.isPresent(), "Pattern must be present!");
-        assertThat("Not the expected pattern!", pattern.get(), instanceOf(AtPattern.class));
+        assertThat("Not the expected pattern!", pattern, instanceOf(AtPattern.class));
 
-        PowerMockito.verifyPrivate(ScraperPatternFactory.class)
-            .invoke("getClassName");
-    }
-    
-    /**
-     * Tests that a pattern has not been found
-     * @throws Exception if an error using PowerMockito is found
-     */
-    @Test
-    public void mustNotFindThePattern() throws Exception {
-        PowerMockito.doReturn(Optional.of("notExistentPattern"))
-            .when(ScraperPatternFactory.class, "getClassName");
-
-        Optional<ScraperPattern> pattern = ScraperPatternFactory.getPattern();
-        
-        assertFalse(pattern.isPresent(), "Pattern must not be present!");
-
-        PowerMockito.verifyPrivate(ScraperPatternFactory.class)
-            .invoke("getClassName");
+        verifyPrivate(ScraperPatternFactory.class).invoke("getClassName");
     }
 }
